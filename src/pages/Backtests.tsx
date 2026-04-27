@@ -31,18 +31,63 @@ export default function Backtests() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">{bt?.name ?? 'No backtest yet'}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
           {bt && (
             <Badge variant="secondary" className="font-mono text-xs">
               {new Date(bt.start_date).toLocaleDateString()} → {new Date(bt.end_date).toLocaleDateString()}
             </Badge>
           )}
-          <Button size="sm" onClick={() => run.mutate(undefined)} disabled={run.isPending}>
-            <Play className="h-3.5 w-3.5 mr-1.5" />
-            {run.isPending ? 'Running…' : 'Run new backtest'}
+          <Badge variant="outline" className="font-mono text-xs gap-1">
+            <Database className="h-3 w-3" /> {candleCount} candles
+          </Badge>
+          <div className="flex items-center gap-2">
+            <Switch id="auto-seed" checked={autoSeed} onCheckedChange={setAutoSeed} disabled={run.isPending} />
+            <Label htmlFor="auto-seed" className="text-xs cursor-pointer">Auto-seed</Label>
+          </div>
+          <Button size="sm" onClick={() => run.mutate({ auto_seed: autoSeed })} disabled={run.isPending}>
+            {run.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
+            {run.isPending ? 'Working…' : 'Run new backtest'}
           </Button>
         </div>
       </motion.div>
+
+      {phase && (
+        <motion.div variants={item}>
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertTitle>{phase}</AlertTitle>
+            <AlertDescription className="text-xs text-muted-foreground">
+              {needsSeed && autoSeed
+                ? 'Generating ~1500 candles of mock market history before running the simulation. This typically takes 5–15 seconds.'
+                : 'Running pipeline: features → strategy → risk → execution → analytics.'}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
+      {run.isError && !run.isPending && (
+        <motion.div variants={item}>
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Backtest failed</AlertTitle>
+            <AlertDescription>{(run.error as Error)?.message ?? 'Unknown error'}</AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
+      {needsSeed && !run.isPending && !bt && (
+        <motion.div variants={item}>
+          <Alert>
+            <Database className="h-4 w-4" />
+            <AlertTitle>No market data yet</AlertTitle>
+            <AlertDescription>
+              {autoSeed
+                ? 'Click "Run new backtest" — candle history will be auto-seeded first.'
+                : 'Enable Auto-seed or seed market data manually before running a backtest.'}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
