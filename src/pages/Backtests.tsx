@@ -1,17 +1,25 @@
 import { MetricCard } from "@/components/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, DollarSign, AlertTriangle, Target, Activity, Inbox, Play } from "lucide-react";
+import { BarChart3, TrendingUp, DollarSign, AlertTriangle, Target, Activity, Inbox, Play, Loader2, Database } from "lucide-react";
 import { CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, XAxis, YAxis } from "recharts";
-import { useLatestBacktest, useRunBacktest } from "@/hooks/useEngine";
+import { useLatestBacktest, useRunBacktest, useCandleCount } from "@/hooks/useEngine";
+import { useState } from "react";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
 export default function Backtests() {
   const { data: bt, isLoading } = useLatestBacktest();
+  const { data: candleCount = 0 } = useCandleCount();
+  const [autoSeed, setAutoSeed] = useState(true);
   const run = useRunBacktest();
+  const needsSeed = candleCount < 250;
+  const phase = run.isPending ? (needsSeed && autoSeed ? 'Seeding candle history…' : 'Running backtest…') : null;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-7xl">
