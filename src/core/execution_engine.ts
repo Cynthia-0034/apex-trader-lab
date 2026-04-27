@@ -37,10 +37,10 @@ export class PaperBroker implements BrokerAdapter {
 export class MT5Broker implements BrokerAdapter {
   name = 'mt5';
   connected = false;
-  async connect() { throw new Error('MT5 connection not configured. Live trading is locked.'); }
-  async getSpread() { throw new Error('MT5 broker not connected.'); }
+  async connect(): Promise<void> { throw new Error('MT5 connection not configured. Live trading is locked.'); }
+  async getSpread(): Promise<number> { throw new Error('MT5 broker not connected.'); }
   async placeOrder(): Promise<BrokerFill> { throw new Error('MT5 broker not connected.'); }
-  async closeOrder() { throw new Error('MT5 broker not connected.'); }
+  async closeOrder(): Promise<{ pnl: number }> { throw new Error('MT5 broker not connected.'); }
 }
 
 export function calcPnl(side: Side, entry: number, exit: number, lotSize: number) {
