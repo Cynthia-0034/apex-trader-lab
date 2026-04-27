@@ -24,14 +24,31 @@ Deno.serve(async (req) => {
     if (cfgErr || !cfgRow) throw new Error('No active config');
     const cfg = cfgRow as unknown as Config;
 
-    // Load candles
-    const { data: candleRows, error: cErr } = await supabase
+    // Load candles (auto-seed if missing)
+    let seeded = 0;
+    const loadCandles = async () => await supabase
       .from('candles').select('ts,open,high,low,close,volume,spread')
       .eq('pair', cfg.pair).eq('timeframe', cfg.timeframe)
       .order('ts', { ascending: true }).limit(2000);
+
+    let { data: candleRows, error: cErr } = await loadCandles();
     if (cErr) throw cErr;
+
+    if ((!candleRows || candleRows.length < 250) && autoSeed) {
+      await supabase.from('events').insert({
+        type: 'pipeline', stage: 'ingestion',
+        message: `Auto-seeding ${seedCount} candles for backtest…`,
+        payload: { reason: 'insufficient_history', requested: seedCount },
+      });
+      const { data: seedRes, error: seedErr } = await supabase.functions.invoke('seed-data', { body: { count: seedCount } });
+      if (seedErr) throw new Error(`Auto-seed failed: ${seedErr.message}`);
+      seeded = seedRes?.inserted ?? 0;
+      ({ data: candleRows, error: cErr } = await loadCandles());
+      if (cErr) throw cErr;
+    }
+
     if (!candleRows || candleRows.length < 250) {
-      return new Response(JSON.stringify({ error: 'Not enough candles. Seed market data first.' }), {
+      return new Response(JSON.stringify({ error: 'Not enough candles. Enable auto-seed or seed market data first.' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
