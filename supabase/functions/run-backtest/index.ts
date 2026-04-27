@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       payload: { backtest_id: bt.id, rejections: result.rejections.length },
     });
 
-    return new Response(JSON.stringify({ backtest: bt, metrics: result.metrics, rejections: result.rejections }), {
+    return new Response(JSON.stringify({ backtest: bt, metrics: result.metrics, rejections: result.rejections, seeded }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
