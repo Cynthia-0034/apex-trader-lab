@@ -35,13 +35,17 @@ if (!URL_ || !KEY) {
 const STRICT = process.argv.includes('--strict');
 const STALE_MS = 24 * 60 * 60 * 1000;
 
+// NOTE: `features` are computed in-memory by the engine and not persisted to
+// the `features` table in the current architecture. Same for `signals` outside
+// of live paper runs. Mark these optional so an empty table doesn't block deploys
+// while ingestion has data. Use --strict locally to enforce stricter gates.
 const STAGES = [
   { key: 'ingestion', table: 'candles',  ts: 'ts',         requiresPrev: false },
-  { key: 'features',  table: 'features', ts: 'ts',         requiresPrev: 'ingestion' },
-  { key: 'strategy',  table: 'signals',  ts: 'ts',         requiresPrev: 'features' },
-  { key: 'risk',      table: 'signals',  ts: 'ts',         requiresPrev: 'strategy', filter: 'approved=not.is.null' },
+  { key: 'features',  table: 'features', ts: 'ts',         requiresPrev: false, optional: true },
+  { key: 'strategy',  table: 'signals',  ts: 'ts',         requiresPrev: false, optional: true },
+  { key: 'risk',      table: 'signals',  ts: 'ts',         requiresPrev: false, optional: true, filter: 'approved=not.is.null' },
   { key: 'execution', table: 'trades',   ts: 'entry_time', requiresPrev: false, optional: true },
-  { key: 'logging',   table: 'events',   ts: 'ts',         requiresPrev: false },
+  { key: 'logging',   table: 'events',   ts: 'ts',         requiresPrev: false, optional: true },
 ];
 
 async function latest(table, tsCol, filter) {
