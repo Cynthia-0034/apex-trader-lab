@@ -1,7 +1,7 @@
 // Strategy Engine — pluggable design.
 // Strategies implement the Strategy interface and are registered by key.
 
-import type { Config, Features, Signal } from './types';
+import type { Config, Features, Signal } from './types.ts';
 
 export interface Strategy {
   key: string;

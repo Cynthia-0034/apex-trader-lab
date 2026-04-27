@@ -1,12 +1,12 @@
 // Backtest Engine — candle-by-candle realistic simulation.
 // Respects spread, risk rules, and never peeks into the future.
 
-import type { Candle, Config, Side } from './types';
-import { computeFeatures } from './feature_engine';
-import { getStrategy } from './strategy_engine';
-import { evaluateRisk, type RiskState } from './risk_engine';
-import { PaperBroker, calcPnl } from './execution_engine';
-import { computeMetrics, type TradeStat } from './analytics';
+import type { Candle, Config, Side } from './types.ts';
+import { computeFeatures } from './feature_engine.ts';
+import { getStrategy } from './strategy_engine.ts';
+import { evaluateRisk, type RiskState } from './risk_engine.ts';
+import { PaperBroker, calcPnl } from './execution_engine.ts';
+import { computeMetrics, type TradeStat } from './analytics.ts';
 
 export interface BacktestTrade extends TradeStat {
   side: Side;

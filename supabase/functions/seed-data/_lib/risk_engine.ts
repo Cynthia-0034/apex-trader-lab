@@ -1,6 +1,6 @@
 // Risk Engine — MANDATORY GATE. No trade passes without this.
 
-import type { Config, Features, RiskDecision, Signal } from './types';
+import type { Config, Features, RiskDecision, Signal } from './types.ts';
 
 export interface RiskState {
   daily_trade_count: number;

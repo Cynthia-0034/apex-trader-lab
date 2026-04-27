@@ -1,7 +1,7 @@
 // Feature Engineering Layer
 // Computes EMA, RSI, ATR from candles.
 
-import type { Candle, Features } from './types';
+import type { Candle, Features } from './types.ts';
 
 export function ema(values: number[], period: number): number[] {
   const k = 2 / (period + 1);
