@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import Dashboard from "./pages/Dashboard";
+import Pipeline from "./pages/Pipeline";
 import Strategy from "./pages/Strategy";
 import Backtests from "./pages/Backtests";
 import Trades from "./pages/Trades";
@@ -20,6 +21,7 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/pipeline" element={<Pipeline />} />
             <Route path="/strategy" element={<Strategy />} />
             <Route path="/backtests" element={<Backtests />} />
             <Route path="/trades" element={<Trades />} />
