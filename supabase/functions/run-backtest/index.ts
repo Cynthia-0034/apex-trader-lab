@@ -15,6 +15,8 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
     const body = await req.json().catch(() => ({}));
     const name = body.name ?? `Backtest ${new Date().toISOString().slice(0, 16)}`;
+    const autoSeed = body.auto_seed !== false; // default true
+    const seedCount = body.seed_count ?? 1500;
 
     // Load active config
     const { data: cfgRow, error: cfgErr } = await supabase
