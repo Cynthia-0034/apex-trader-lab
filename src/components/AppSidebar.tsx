@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   ShieldCheck,
   Zap,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -21,6 +22,7 @@ import {
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Pipeline", url: "/pipeline", icon: Sparkles },
   { title: "Strategy", url: "/strategy", icon: Brain },
   { title: "Backtests", url: "/backtests", icon: BarChart3 },
   { title: "Trades", url: "/trades", icon: ArrowLeftRight },
