@@ -127,13 +127,14 @@ export function useRunPipeline() {
 export function useRunBacktest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (name?: string) => {
-      const { data, error } = await supabase.functions.invoke('run-backtest', { body: { name } });
+    mutationFn: async (opts?: { name?: string; auto_seed?: boolean; seed_count?: number }) => {
+      const { data, error } = await supabase.functions.invoke('run-backtest', { body: opts ?? {} });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;
     },
     onSuccess: (d) => {
+      if (d?.seeded) toast.info(`Auto-seeded ${d.seeded} candles`);
       toast.success(`Backtest complete: ${d.metrics.total_trades} trades, ${d.metrics.win_rate}% win rate`);
       qc.invalidateQueries();
     },

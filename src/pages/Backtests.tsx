@@ -1,17 +1,25 @@
 import { MetricCard } from "@/components/MetricCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, DollarSign, AlertTriangle, Target, Activity, Inbox, Play } from "lucide-react";
+import { BarChart3, TrendingUp, DollarSign, AlertTriangle, Target, Activity, Inbox, Play, Loader2, Database } from "lucide-react";
 import { CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, XAxis, YAxis } from "recharts";
-import { useLatestBacktest, useRunBacktest } from "@/hooks/useEngine";
+import { useLatestBacktest, useRunBacktest, useCandleCount } from "@/hooks/useEngine";
+import { useState } from "react";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
 
 export default function Backtests() {
   const { data: bt, isLoading } = useLatestBacktest();
+  const { data: candleCount = 0 } = useCandleCount();
+  const [autoSeed, setAutoSeed] = useState(true);
   const run = useRunBacktest();
+  const needsSeed = candleCount < 250;
+  const phase = run.isPending ? (needsSeed && autoSeed ? 'Seeding candle history…' : 'Running backtest…') : null;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-7xl">
@@ -23,18 +31,63 @@ export default function Backtests() {
           </h1>
           <p className="text-sm text-muted-foreground mt-1">{bt?.name ?? 'No backtest yet'}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
           {bt && (
             <Badge variant="secondary" className="font-mono text-xs">
               {new Date(bt.start_date).toLocaleDateString()} → {new Date(bt.end_date).toLocaleDateString()}
             </Badge>
           )}
-          <Button size="sm" onClick={() => run.mutate(undefined)} disabled={run.isPending}>
-            <Play className="h-3.5 w-3.5 mr-1.5" />
-            {run.isPending ? 'Running…' : 'Run new backtest'}
+          <Badge variant="outline" className="font-mono text-xs gap-1">
+            <Database className="h-3 w-3" /> {candleCount} candles
+          </Badge>
+          <div className="flex items-center gap-2">
+            <Switch id="auto-seed" checked={autoSeed} onCheckedChange={setAutoSeed} disabled={run.isPending} />
+            <Label htmlFor="auto-seed" className="text-xs cursor-pointer">Auto-seed</Label>
+          </div>
+          <Button size="sm" onClick={() => run.mutate({ auto_seed: autoSeed })} disabled={run.isPending}>
+            {run.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
+            {run.isPending ? 'Working…' : 'Run new backtest'}
           </Button>
         </div>
       </motion.div>
+
+      {phase && (
+        <motion.div variants={item}>
+          <Alert>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <AlertTitle>{phase}</AlertTitle>
+            <AlertDescription className="text-xs text-muted-foreground">
+              {needsSeed && autoSeed
+                ? 'Generating ~1500 candles of mock market history before running the simulation. This typically takes 5–15 seconds.'
+                : 'Running pipeline: features → strategy → risk → execution → analytics.'}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
+      {run.isError && !run.isPending && (
+        <motion.div variants={item}>
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Backtest failed</AlertTitle>
+            <AlertDescription>{(run.error as Error)?.message ?? 'Unknown error'}</AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
+      {needsSeed && !run.isPending && !bt && (
+        <motion.div variants={item}>
+          <Alert>
+            <Database className="h-4 w-4" />
+            <AlertTitle>No market data yet</AlertTitle>
+            <AlertDescription>
+              {autoSeed
+                ? 'Click "Run new backtest" — candle history will be auto-seeded first.'
+                : 'Enable Auto-seed or seed market data manually before running a backtest.'}
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
