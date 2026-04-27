@@ -2,11 +2,11 @@
 // Runs Data → Features → Strategy → Risk → Execution → Logging on the latest candle.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from 'jsr:@supabase/supabase-js/cors';
-import { computeFeatures } from '../_shared/feature_engine.ts';
-import { getStrategy } from '../_shared/strategy_engine.ts';
-import { evaluateRisk, type RiskState } from '../_shared/risk_engine.ts';
-import { PaperBroker } from '../_shared/execution_engine.ts';
-import type { Candle, Config } from '../_shared/types.ts';
+import { computeFeatures } from './_lib/feature_engine.ts';
+import { getStrategy } from './_lib/strategy_engine.ts';
+import { evaluateRisk, type RiskState } from './_lib/risk_engine.ts';
+import { PaperBroker } from './_lib/execution_engine.ts';
+import type { Candle, Config } from './_lib/types.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
