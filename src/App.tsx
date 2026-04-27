@@ -9,6 +9,7 @@ import Strategy from "./pages/Strategy";
 import Backtests from "./pages/Backtests";
 import Trades from "./pages/Trades";
 import Safety from "./pages/Safety";
+import Health from "./pages/Health";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/backtests" element={<Backtests />} />
             <Route path="/trades" element={<Trades />} />
             <Route path="/safety" element={<Safety />} />
+            <Route path="/health" element={<Health />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

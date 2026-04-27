@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Zap,
   Sparkles,
+  Activity,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -27,6 +28,7 @@ const items = [
   { title: "Backtests", url: "/backtests", icon: BarChart3 },
   { title: "Trades", url: "/trades", icon: ArrowLeftRight },
   { title: "Safety", url: "/safety", icon: ShieldCheck },
+  { title: "Health", url: "/health", icon: Activity },
 ];
 
 export function AppSidebar() {
