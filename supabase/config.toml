@@ -1,1 +1,13 @@
 project_id = "almckdygqazswjufewcc"
+
+[functions.run-backtest]
+verify_jwt = false
+
+[functions.run-pipeline]
+verify_jwt = false
+
+[functions.seed-data]
+verify_jwt = false
+
+[functions.toggle-kill-switch]
+verify_jwt = false

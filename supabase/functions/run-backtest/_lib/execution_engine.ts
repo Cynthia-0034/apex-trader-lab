@@ -1,7 +1,7 @@
 // Execution Engine — Broker abstraction layer.
 // PaperBroker fully implemented. MT5Broker is a locked stub (live mode disabled).
 
-import type { BrokerFill, Order, Side } from './types';
+import type { BrokerFill, Order, Side } from './types.ts';
 
 export interface BrokerAdapter {
   name: string;

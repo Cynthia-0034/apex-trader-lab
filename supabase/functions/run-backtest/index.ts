@@ -2,8 +2,8 @@
 // Loads candles, runs the modular pipeline, persists run + trades.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from 'jsr:@supabase/supabase-js/cors';
-import { runBacktest } from '../_shared/backtest_engine.ts';
-import type { Candle, Config } from '../_shared/types.ts';
+import { runBacktest } from './_lib/backtest_engine.ts';
+import type { Candle, Config } from './_lib/types.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
