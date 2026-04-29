@@ -1,1 +1,0 @@
-ALTER TABLE public.configs ADD COLUMN IF NOT EXISTS live_trading_armed boolean NOT NULL DEFAULT false;
