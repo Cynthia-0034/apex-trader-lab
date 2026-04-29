@@ -5,6 +5,7 @@ import { Activity, DollarSign, TrendingUp, Shield, BarChart3, Clock } from "luci
 import { motion } from "framer-motion";
 import { useActiveConfig, useEvents, useLatestBacktest, useTrades } from "@/hooks/useEngine";
 import { PipelineHealthPanel } from "@/components/PipelineHealthPanel";
+import { MT5BridgeStatus } from "@/components/MT5BridgeStatus";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
@@ -113,9 +114,14 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      <motion.div variants={item}>
-        <PipelineHealthPanel />
-      </motion.div>
+      <div className="grid md:grid-cols-3 gap-6">
+        <motion.div variants={item} className="md:col-span-2">
+          <PipelineHealthPanel />
+        </motion.div>
+        <motion.div variants={item} className="md:col-span-1">
+          <MT5BridgeStatus />
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
