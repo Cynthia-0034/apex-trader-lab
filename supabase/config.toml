@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.toggle-kill-switch]
 verify_jwt = false
+
+[functions.mt5-bridge-probe]
+verify_jwt = false
+
+[functions.live-dry-run]
+verify_jwt = false
