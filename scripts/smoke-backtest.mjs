@@ -54,22 +54,33 @@ try {
     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout after 60s')), 60_000)),
   ]);
 
-  const trades = result?.metrics?.total_trades ?? 0;
+  const m = result?.metrics ?? {};
+  const trades = m.total_trades ?? 0;
   const rejections = Array.isArray(result?.rejections) ? result.rejections.length : 0;
   console.log(`  • backtest completed: ${trades} trades, ${rejections} rejections`);
 
   // Verify downstream artifacts exist after the run.
-  const [sig, approved, evt] = await Promise.all([
+  const [sig, approved, evt, btRow, tradeRows] = await Promise.all([
     rest(`signals?select=id&order=ts.desc&limit=1`),
     rest(`signals?select=id&approved=not.is.null&order=ts.desc&limit=1`),
     rest(`events?select=id&stage=eq.backtest&order=ts.desc&limit=1`),
+    rest(`backtests?select=equity_curve,win_rate,profit_factor,max_drawdown,total_trades&order=created_at.desc&limit=1`),
+    rest(`trades?select=id&mode=eq.backtest&order=entry_time.desc&limit=1`),
   ]);
+
+  const bt = btRow?.[0] ?? {};
+  const equityLen = Array.isArray(bt.equity_curve) ? bt.equity_curve.length : 0;
 
   const checks = [
     { name: 'signals generated',   ok: trades > 0 || sig.length > 0 },
     { name: 'risk approvals/rejections logged', ok: trades > 0 || approved.length > 0 || rejections > 0 },
     { name: 'execution log written', ok: trades > 0 },
     { name: 'pipeline event logged', ok: evt.length > 0 },
+    { name: `equity curve generated (${equityLen} pts)`, ok: equityLen > 1 },
+    { name: `win rate present (${m.win_rate ?? bt.win_rate})`, ok: (m.win_rate ?? bt.win_rate) != null },
+    { name: `profit factor present (${m.profit_factor ?? bt.profit_factor})`, ok: (m.profit_factor ?? bt.profit_factor) != null },
+    { name: `max drawdown present (${m.max_drawdown ?? bt.max_drawdown})`, ok: (m.max_drawdown ?? bt.max_drawdown) != null },
+    { name: 'trade history persisted', ok: trades === 0 || tradeRows.length > 0 },
   ];
 
   let failed = 0;
