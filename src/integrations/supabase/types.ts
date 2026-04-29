@@ -137,6 +137,7 @@ export type Database = {
           ema_slow: number
           id: string
           kill_switch: boolean
+          live_trading_armed: boolean
           max_daily_loss: number
           max_daily_trades: number
           max_open_trades: number
@@ -166,6 +167,7 @@ export type Database = {
           ema_slow?: number
           id?: string
           kill_switch?: boolean
+          live_trading_armed?: boolean
           max_daily_loss?: number
           max_daily_trades?: number
           max_open_trades?: number
@@ -195,6 +197,7 @@ export type Database = {
           ema_slow?: number
           id?: string
           kill_switch?: boolean
+          live_trading_armed?: boolean
           max_daily_loss?: number
           max_daily_trades?: number
           max_open_trades?: number
