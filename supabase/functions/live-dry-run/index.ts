@@ -2,9 +2,9 @@
 // Zero orders. Zero trades. Safe to run on an interval.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from 'jsr:@supabase/supabase-js/cors';
-import { computeFeatures } from '../run-pipeline/_lib/feature_engine.ts';
-import { getStrategy } from '../run-pipeline/_lib/strategy_engine.ts';
-import type { Candle, Config } from '../run-pipeline/_lib/types.ts';
+import { computeFeatures } from './_lib/feature_engine.ts';
+import { getStrategy } from './_lib/strategy_engine.ts';
+import type { Candle, Config } from './_lib/types.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
