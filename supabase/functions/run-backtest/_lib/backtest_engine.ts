@@ -4,7 +4,7 @@
 import type { Candle, Config, Side } from './types.ts';
 import { computeFeatures } from './feature_engine.ts';
 import { getStrategy } from './strategy_engine.ts';
-import { evaluateRisk, type RiskState } from './risk_engine.ts';
+import { evaluateRiskWithAudit, type RiskAudit, type RiskState } from './risk_engine.ts';
 import { PaperBroker, calcPnl } from './execution_engine.ts';
 import { computeMetrics, type TradeStat } from './analytics.ts';
 
@@ -22,6 +22,7 @@ export interface BacktestRun {
   trades: BacktestTrade[];
   metrics: ReturnType<typeof computeMetrics>;
   rejections: { ts: string; reason: string }[];
+  audits: RiskAudit[];
 }
 
 export async function runBacktest(candles: Candle[], cfg: Config): Promise<BacktestRun> {
@@ -32,6 +33,7 @@ export async function runBacktest(candles: Candle[], cfg: Config): Promise<Backt
 
   const trades: BacktestTrade[] = [];
   const rejections: { ts: string; reason: string }[] = [];
+  const audits: RiskAudit[] = [];
   let openTrade: BacktestTrade | null = null;
   const state: RiskState = {
     daily_trade_count: 0, open_trade_count: 0,
@@ -84,8 +86,10 @@ export async function runBacktest(candles: Candle[], cfg: Config): Promise<Backt
     const signal = strategy.generateSignal(f, prev, cfg);
     if (!signal) continue;
 
-    // Risk gate
-    const decision = evaluateRisk(signal, f, cfg, state);
+    // Risk gate (with full audit trail)
+    const audit = evaluateRiskWithAudit(signal, f, cfg, state);
+    audits.push(audit);
+    const decision = audit.decision;
     if (!decision.approved) {
       rejections.push({ ts: c.ts, reason: decision.reason ?? 'UNKNOWN' });
       continue;
@@ -117,5 +121,5 @@ export async function runBacktest(candles: Candle[], cfg: Config): Promise<Backt
   }
 
   const metrics = computeMetrics(trades, cfg.account_balance);
-  return { trades, metrics, rejections };
+  return { trades, metrics, rejections, audits };
 }
