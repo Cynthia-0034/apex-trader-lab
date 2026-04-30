@@ -323,6 +323,68 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_audits: {
+        Row: {
+          approved: boolean
+          backtest_id: string | null
+          context: Json
+          decision: Json
+          id: number
+          mode: Database["public"]["Enums"]["trade_mode"] | null
+          pair: string
+          rejection_reason: string | null
+          rules: Json
+          side: Database["public"]["Enums"]["trade_side"] | null
+          signal_id: string | null
+          strategy_key: string
+          timeframe: string
+          trade_id: string | null
+          ts: string
+        }
+        Insert: {
+          approved: boolean
+          backtest_id?: string | null
+          context?: Json
+          decision?: Json
+          id?: number
+          mode?: Database["public"]["Enums"]["trade_mode"] | null
+          pair: string
+          rejection_reason?: string | null
+          rules?: Json
+          side?: Database["public"]["Enums"]["trade_side"] | null
+          signal_id?: string | null
+          strategy_key: string
+          timeframe: string
+          trade_id?: string | null
+          ts?: string
+        }
+        Update: {
+          approved?: boolean
+          backtest_id?: string | null
+          context?: Json
+          decision?: Json
+          id?: number
+          mode?: Database["public"]["Enums"]["trade_mode"] | null
+          pair?: string
+          rejection_reason?: string | null
+          rules?: Json
+          side?: Database["public"]["Enums"]["trade_side"] | null
+          signal_id?: string | null
+          strategy_key?: string
+          timeframe?: string
+          trade_id?: string | null
+          ts?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_audits_backtest_id_fkey"
+            columns: ["backtest_id"]
+            isOneToOne: false
+            referencedRelation: "backtests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signals: {
         Row: {
           approved: boolean | null
@@ -400,6 +462,7 @@ export type Database = {
       }
       trades: {
         Row: {
+          backtest_id: string | null
           close_reason: string | null
           created_at: string
           entry_price: number
@@ -423,6 +486,7 @@ export type Database = {
           timeframe: string
         }
         Insert: {
+          backtest_id?: string | null
           close_reason?: string | null
           created_at?: string
           entry_price: number
@@ -446,6 +510,7 @@ export type Database = {
           timeframe: string
         }
         Update: {
+          backtest_id?: string | null
           close_reason?: string | null
           created_at?: string
           entry_price?: number
@@ -469,6 +534,13 @@ export type Database = {
           timeframe?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trades_backtest_id_fkey"
+            columns: ["backtest_id"]
+            isOneToOne: false
+            referencedRelation: "backtests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trades_signal_id_fkey"
             columns: ["signal_id"]
