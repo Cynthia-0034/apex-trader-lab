@@ -73,10 +73,60 @@ Deno.serve(async (req) => {
     }).select().single();
     if (btErr) throw btErr;
 
+    // Persist trades for this run
+    if (result.trades.length) {
+      const tradeRows = result.trades.map((t) => ({
+        backtest_id: bt.id,
+        mode: cfg.mode,
+        strategy_key: cfg.strategy_key,
+        pair: cfg.pair,
+        timeframe: cfg.timeframe,
+        side: t.side,
+        entry_price: t.entry_price,
+        exit_price: t.exit_price,
+        stop_loss: t.sl,
+        take_profit: t.tp,
+        lot_size: t.lot,
+        risk_amount: cfg.account_balance * (cfg.risk_per_trade / 100),
+        pnl: t.pnl,
+        r_multiple: t.r_multiple,
+        entry_time: t.entry_time,
+        exit_time: t.exit_time,
+        status: 'closed',
+        close_reason: t.close_reason,
+      }));
+      // Chunk inserts to stay under request limits
+      for (let i = 0; i < tradeRows.length; i += 500) {
+        const { error: trErr } = await supabase.from('trades').insert(tradeRows.slice(i, i + 500));
+        if (trErr) console.error('trade insert error', trErr);
+      }
+    }
+
+    // Persist risk audit trail (per-rule pass/fail per evaluated signal)
+    if (result.audits.length) {
+      const auditRows = result.audits.map((a) => ({
+        mode: cfg.mode,
+        pair: cfg.pair,
+        timeframe: cfg.timeframe,
+        strategy_key: cfg.strategy_key,
+        side: a.context.side,
+        approved: a.approved,
+        rejection_reason: a.rejection_reason ?? null,
+        backtest_id: bt.id,
+        rules: a.rules,
+        context: a.context,
+        decision: a.decision,
+      }));
+      for (let i = 0; i < auditRows.length; i += 500) {
+        const { error: auErr } = await supabase.from('risk_audits').insert(auditRows.slice(i, i + 500));
+        if (auErr) console.error('audit insert error', auErr);
+      }
+    }
+
     await supabase.from('events').insert({
       type: 'pipeline', stage: 'backtest',
       message: `Backtest "${name}" completed: ${result.metrics.total_trades} trades, ${result.metrics.win_rate}% win rate, PF ${result.metrics.profit_factor}`,
-      payload: { backtest_id: bt.id, rejections: result.rejections.length },
+      payload: { backtest_id: bt.id, rejections: result.rejections.length, audits: result.audits.length },
     });
 
     return new Response(JSON.stringify({ backtest: bt, metrics: result.metrics, rejections: result.rejections, seeded }), {
