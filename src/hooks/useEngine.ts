@@ -77,6 +77,61 @@ export function useLatestBacktest() {
   });
 }
 
+export function useBacktests() {
+  return useQuery({
+    queryKey: ['backtests', 'list'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('backtests').select('*').order('created_at', { ascending: false }).limit(100);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useBacktest(id: string | null) {
+  return useQuery({
+    enabled: !!id,
+    queryKey: ['backtest', id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('backtests').select('*').eq('id', id!).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useBacktestTrades(id: string | null) {
+  return useQuery({
+    enabled: !!id,
+    queryKey: ['backtest', id, 'trades'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trades').select('*')
+        .eq('backtest_id', id!)
+        .order('entry_time', { ascending: true })
+        .limit(1000);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useBacktestAudits(id: string | null) {
+  return useQuery({
+    enabled: !!id,
+    queryKey: ['backtest', id, 'audits'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('risk_audits').select('*')
+        .eq('backtest_id', id!)
+        .order('ts', { ascending: true })
+        .limit(1000);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export function useCandleCount() {
   return useQuery({
     queryKey: ['candles', 'count'],
