@@ -566,7 +566,7 @@ export type Database = {
         | "signal"
         | "risk"
         | "pipeline"
-      trade_mode: "backtest" | "paper" | "live"
+      trade_mode: "backtest" | "paper" | "live" | "shadow"
       trade_side: "LONG" | "SHORT"
       trade_status: "open" | "closed" | "cancelled" | "rejected"
     }
@@ -705,7 +705,7 @@ export const Constants = {
         "risk",
         "pipeline",
       ],
-      trade_mode: ["backtest", "paper", "live"],
+      trade_mode: ["backtest", "paper", "live", "shadow"],
       trade_side: ["LONG", "SHORT"],
       trade_status: ["open", "closed", "cancelled", "rejected"],
     },
