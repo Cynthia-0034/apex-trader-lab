@@ -1,0 +1,1 @@
+ALTER TYPE trade_mode ADD VALUE IF NOT EXISTS 'shadow';
