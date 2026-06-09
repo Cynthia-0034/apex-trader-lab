@@ -43,14 +43,27 @@ export function MT5BridgeStatus() {
       const { data, error } = await supabase.functions.invoke('live-dry-run', { body: {} });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      if (data?.shadow_signal) toast.success(`Dry-run: shadow ${(data.shadow_signal as { side?: string }).side ?? ''} signal logged (no order)`);
-      else toast.info('Dry-run complete: no signal this bar');
+      const closed = (data?.closed ?? []) as Array<{ pnl: number; reason: string }>;
+      if (closed.length) {
+        const sumPnl = closed.reduce((s, c) => s + c.pnl, 0).toFixed(2);
+        toast.info(`Closed ${closed.length} shadow trade${closed.length > 1 ? 's' : ''} (PnL ${sumPnl})`);
+      }
+      if (data?.shadow_trade) {
+        const tr = data.shadow_trade as { side: string; entry_price: number };
+        toast.success(`Shadow ${tr.side} opened @ ${tr.entry_price} — no broker order`);
+      } else if (data?.decision && !data.decision.approved) {
+        toast.warning(`Signal rejected by risk: ${data.decision.reason}`);
+      } else if (data?.warning === 'insufficient_history') {
+        toast.message(`Candles backfilling (+${data?.upserted ?? 0}) — run more ticks`);
+      } else {
+        toast.info(`Live tick OK · no signal · candles +${data?.upserted ?? 0}`);
+      }
       if (data?.probe) {
         setProbe(data.probe as Probe);
         if ((data.probe as Probe)?.ok) setLastSuccess(new Date().toISOString());
       }
     } catch (e) {
-      toast.error(`Dry-run failed: ${e instanceof Error ? e.message : String(e)}`);
+      toast.error(`Live tick failed: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setDryRunBusy(false);
     }
@@ -129,11 +142,12 @@ export function MT5BridgeStatus() {
         </Button>
         <Button size="sm" onClick={runDryRun} disabled={dryRunBusy} className="flex-1">
           {dryRunBusy ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <PlayCircle className="h-3 w-3 mr-2" />}
-          Live dry-run
+          Run live tick
         </Button>
       </div>
       <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-        Dry-run probes the bridge and writes <strong>shadow signals</strong> only — no orders are placed.
+        Each tick pulls real candles + spread + balance, runs the risk engine, and writes <strong>shadow trades</strong>
+        {' '}(<code className="font-mono">mode=shadow</code>) — never sends an order to the broker.
       </p>
     </div>
   );
